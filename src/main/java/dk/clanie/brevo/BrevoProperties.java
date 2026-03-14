@@ -47,6 +47,21 @@ public class BrevoProperties {
 	private boolean sandbox = false;
 
 	/**
+	 * Secret token that Brevo includes in the configured request header on every
+	 * webhook call. The controller compares the received header value against this
+	 * secret and rejects the request if they don't match. Leave blank to skip
+	 * verification (not recommended in production).
+	 */
+	private String webhookSecret;
+
+	/**
+	 * Name of the HTTP header that carries the webhook secret.
+	 * Must match what is configured in the Brevo webhook settings.
+	 * Defaults to {@code X-Brevo-Webhook-Secret}.
+	 */
+	private String webhookSecretHeader = "X-Brevo-Webhook-Secret";
+
+	/**
 	 * Named sender configurations, keyed by purpose (e.g. {@code transactional}).
 	 * <p>
 	 * Example YAML:
