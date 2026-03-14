@@ -59,6 +59,7 @@ class BrevoClientIntegrationTest {
 		properties.setApiKey(apiKey);
 		properties.setUrl(BREVO_API_URL);
 		properties.setSandbox(true); // Sandbox: accepted but not delivered
+		properties.setWiretap(false);
 
 		brevoClient = new BrevoClient(properties, restClientFactory);
 		brevoClient.init();
