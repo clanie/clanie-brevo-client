@@ -22,9 +22,11 @@ import static org.assertj.core.api.Assertions.assertThat;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.web.client.RestClient;
 
 import dk.clanie.brevo.dto.SendEmailResponse;
+import dk.clanie.test.env.EnvFileExtension;
 import dk.clanie.web.RestClientFactory;
 
 /**
@@ -38,6 +40,7 @@ import dk.clanie.web.RestClientFactory;
  * actually delivering the email.
  */
 @Tag("integration")
+@ExtendWith(EnvFileExtension.class)
 class BrevoClientIntegrationTest {
 
 	private static final String BREVO_API_URL = "https://api.brevo.com/v3";
@@ -47,9 +50,8 @@ class BrevoClientIntegrationTest {
 
 	@BeforeEach
 	void setUp() {
-		String apiKey = System.getenv("BREVO_API_KEY");
+		String apiKey = System.getProperty("BREVO_API_KEY", System.getenv("BREVO_API_KEY"));
 		if (apiKey == null || apiKey.isBlank()) {
-			// Fall back to a placeholder that will cause a 401 — test will still exercise the HTTP path
 			apiKey = "placeholder-key";
 		}
 
