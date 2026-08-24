@@ -18,6 +18,7 @@
 package dk.clanie.brevo;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Tag;
@@ -32,9 +33,19 @@ import dk.clanie.web.RestClientFactory;
 /**
  * Integration test for {@link BrevoClient} against the real Brevo sandbox API.
  * <p>
- * Requires a valid {@code BREVO_API_KEY} environment variable.
- * Tagged {@code "integration"} so it is excluded from the default build.
- * Run with: {@code mvn test -Dgroups=integration}
+ * This module configures no surefire {@code excludedGroups}, so the
+ * {@code "integration"} tag alone does not keep the test out of a plain
+ * {@code mvn test}. The test is therefore opt-in via the key instead: it is
+ * <em>skipped</em> unless {@code BREVO_API_KEY} is supplied as an environment
+ * variable, a system property, or a {@code .env.local} entry.
+ * <p>
+ * That guard is deliberate. Brevo webhooks are configured per <em>account</em>,
+ * so a send from this test — sandbox or not — delivers {@code request} and
+ * {@code blocked} events to whatever webhook URL the account points at, which
+ * in practice is production. Production has no {@code SentEmail} for a message
+ * it never sent, so each run left a pair of "No SentEmail found" warnings in the
+ * production log (portfolio issue #251). Never let this test run against the
+ * production Brevo account by accident.
  * <p>
  * Brevo's sandbox mode accepts requests and returns a {@code messageId} without
  * actually delivering the email.
@@ -51,9 +62,8 @@ class BrevoClientIntegrationTest {
 	@BeforeEach
 	void setUp() {
 		String apiKey = System.getProperty("BREVO_API_KEY", System.getenv("BREVO_API_KEY"));
-		if (apiKey == null || apiKey.isBlank()) {
-			apiKey = "placeholder-key";
-		}
+		assumeTrue(apiKey != null && !apiKey.isBlank(),
+				"BREVO_API_KEY not set — skipping the live Brevo sandbox call.");
 
 		RestClientFactory restClientFactory = new RestClientFactory(RestClient.builder());
 
